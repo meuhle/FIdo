@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ActivityIndicator, Image, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Image, ScrollView, Text, Button, Modal, TextInput, View } from 'react-native';
 import { rotateImage } from '../modules/imaging';
 import { toBase64Image } from '../utils/base64';
 import { Agent } from '../agent/Agent';
@@ -78,6 +78,8 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
     const agent = React.useMemo(() => new Agent(), []);
     const agentState = agent.use();
 
+    const [modalVisible, setModalVisible] = React.useState(false);
+
     // Background processing agent
     const processedPhotos = React.useRef<Uint8Array[]>([]);
     const sync = React.useMemo(() => {
@@ -95,6 +97,22 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
         sync.invalidate();
     }, [photos]);
 
+    // Effect to call agent.answer when a new photo is added
+    const previousPhotosCount = React.useRef(photos.length);
+    let answer:string = "";
+    React.useEffect(() => {
+        if (photos.length > previousPhotosCount.current) {
+            agent.answer("There is one or multiple snakes in the last picture? Just answer Yes or No",true);
+            console.log(agentState.snakes)
+           /* if (typeof agentState.snakes === 'string'){
+                if (agentState.snakes.indexOf('Yes') != -1 ){
+                    alert("Snakesssss")
+                }
+            }*/
+        }
+        previousPhotosCount.current = photos.length;
+    }, [photos]);
+
     React.useEffect(() => {
         if (agentState.answer) {
             textToSpeech(agentState.answer)
@@ -103,6 +121,12 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+             {/* Red alert on top if agentState.snakes is defined */}
+             {typeof agentState.snakes === 'string'&& agentState.snakes.indexOf('Yes') != -1 && (
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: 'red', padding: 10, zIndex: 1000 }}>
+                    <Text style={{ color: 'white', fontSize: 18 }}>Alert: Snake detected!</Text>
+                </View>
+            )}
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                     {photos.map((photo, index) => (
@@ -121,9 +145,11 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
                     placeholder='What do you need?'
                     placeholderTextColor={'#888'}
                     readOnly={agentState.loading}
-                    onSubmitEditing={(e) => agent.answer(e.nativeEvent.text)}
+                    onSubmitEditing={(e) => agent.answer(e.nativeEvent.text, false)}
                 />
             </View>
+             {/* Modal for Notification */}
+            
         </View>
     );
 });

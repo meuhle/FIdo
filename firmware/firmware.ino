@@ -1,5 +1,5 @@
-#define CAMERA_MODEL_XIAO_ESP32S3
-#include <I2S.h>
+#define CAMERA_MODEL_AI_THINKER
+#include <driver/I2S.h>
 // #include "FS.h"
 // #include "SD.h"
 #include <BLE2902.h>
@@ -7,7 +7,10 @@
 #include <BLEUtils.h>
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
+#include "soc/soc.h"           //disable brownout problems
+#include "soc/rtc_cntl_reg.h"  //disable brownout problems
 #include "esp_camera.h"
+#include "fb_gfx.h"
 #include "camera_pins.h"
 #include "mulaw.h"
 
@@ -24,26 +27,21 @@ BLECharacteristic *audio;
 BLECharacteristic *photo;
 bool connected = false;
 
-class ServerHandler: public BLEServerCallbacks
-{
-  void onConnect(BLEServer *server)
-  {
+class ServerHandler : public BLEServerCallbacks {
+  void onConnect(BLEServer *server) {
     connected = true;
     Serial.println("Connected");
   }
 
-  void onDisconnect(BLEServer *server)
-  {
+  void onDisconnect(BLEServer *server) {
     connected = false;
     Serial.println("Disconnected");
     BLEDevice::startAdvertising();
   }
 };
 
-class MessageHandler: public BLECharacteristicCallbacks
-{
-  void onWrite(BLECharacteristic* pCharacteristic, esp_ble_gatts_cb_param_t* param)
-  {
+class MessageHandler : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic *pCharacteristic, esp_ble_gatts_cb_param_t *param) {
     // Currently unused
   }
 };
@@ -56,8 +54,7 @@ void configure_ble() {
   // Audio service
   audio = service->createCharacteristic(
     audioCharUUID,
-    BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY
-  );
+    BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
   BLE2902 *ccc = new BLE2902();
   ccc->setNotifications(true);
   audio->addDescriptor(ccc);
@@ -65,8 +62,7 @@ void configure_ble() {
   // Photo service
   photo = service->createCharacteristic(
     photoCharUUID,
-    BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY
-  );
+    BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
   ccc = new BLE2902();
   ccc->setNotifications(true);
   photo->addDescriptor(ccc);
@@ -74,9 +70,8 @@ void configure_ble() {
   // Codec service
   BLECharacteristic *codec = service->createCharacteristic(
     audioCodecUUID,
-    BLECharacteristic::PROPERTY_READ
-  );
-  uint8_t codecId = 11; // MuLaw 8mhz
+    BLECharacteristic::PROPERTY_READ);
+  uint8_t codecId = 11;  // MuLaw 8mhz
   codec->setValue(&codecId, 1);
 
   // Service
@@ -101,7 +96,7 @@ void configure_ble() {
 //   }
 //   // Save photo to file
 //   writeFile(SD, fileName, fb->buf, fb->len);
-  
+
 //   // Release image buffer
 //   esp_camera_fb_return(fb);
 
@@ -148,9 +143,17 @@ bool take_photo() {
   // sprintf(filename, "/image_%d.jpg", images_written);
   // writeFile(SD, filename, fb->buf, fb->len);
   // images_written++;
+//Serial.printf("Photo taken! Size: %d bytes\n", fb->len);
+
+  // Log the first few bytes of the image data for debugging
+  for (int i = 0; i < 10 && i < fb->len; ++i) {
+   // Serial.printf("%02x ", fb->buf[i]);
+  }
+  //Serial.println();
 
   return true;
 }
+
 
 //
 // Microphone
@@ -166,24 +169,46 @@ static uint8_t *s_compressed_frame_2 = nullptr;
 
 void configure_microphone() {
 
-  // start I2S at 16 kHz with 16-bits per sample
-  I2S.setAllPins(-1, 42, 41, -1, -1);
-  if (!I2S.begin(PDM_MONO_MODE, 8000, 16)) {
-    Serial.println("Failed to initialize I2S!");
-    while (1); // do nothing
-  }
+  i2s_config_t i2s_config = {
+    .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX),
+    .sample_rate = 8000,
+    .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
+    .channel_format = I2S_CHANNEL_FMT_ONLY_RIGHT,
+    .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB),
+    .intr_alloc_flags = 0,
+    .dma_buf_count = 8,
+    .dma_buf_len = 64,
+    .use_apll = false,
+    .tx_desc_auto_clear = false,
+    .fixed_mclk = 0
+  };
+
+  // I2S pin configuration
+  i2s_pin_config_t pin_config = {
+    .bck_io_num = BCK_NUM,
+    .ws_io_num = WS_NUM,
+    .data_out_num = DATA_OUT_NUM,
+    .data_in_num = DATA_OUT_NUM
+  };
+
+  // Install and start I2S driver
+  i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
+  i2s_set_pin(I2S_NUM_0, &pin_config);
+  i2s_zero_dma_buffer(I2S_NUM_0);
 
   // Allocate buffers
-  s_recording_buffer = (uint8_t *) ps_calloc(recording_buffer_size, sizeof(uint8_t));
-  s_compressed_frame = (uint8_t *) ps_calloc(compressed_buffer_size, sizeof(uint8_t));
-  s_compressed_frame_2 = (uint8_t *) ps_calloc(compressed_buffer_size, sizeof(uint8_t));
+  s_recording_buffer = (uint8_t *)ps_calloc(recording_buffer_size, sizeof(uint8_t));
+  s_compressed_frame = (uint8_t *)ps_calloc(compressed_buffer_size, sizeof(uint8_t));
+  
 }
 
+
 size_t read_microphone() {
-  size_t bytes_recorded = 0;
-  esp_i2s::i2s_read(esp_i2s::I2S_NUM_0, s_recording_buffer, recording_buffer_size, &bytes_recorded, portMAX_DELAY);
+  size_t bytes_recorded;
+  i2s_read(I2S_NUM_0, (void *)s_recording_buffer, recording_buffer_size, &bytes_recorded, portMAX_DELAY);
   return bytes_recorded;
 }
+
 
 //
 // Camera
@@ -191,6 +216,11 @@ size_t read_microphone() {
 
 void configure_camera() {
   camera_config_t config;
+
+  //servo1.attach(servo1_pin);
+  //servo2.attach(servo2_pin);
+  //servo_setup();
+  
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
   config.pin_d0 = Y2_GPIO_NUM;
@@ -210,30 +240,32 @@ void configure_camera() {
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
-  config.frame_size = FRAMESIZE_UXGA;
-  config.pixel_format = PIXFORMAT_JPEG; // for streaming
-  config.fb_count = 1;
-
-  // High quality (psram)
-  // config.jpeg_quality = 10;
-  // config.fb_count = 2;
-  // config.grab_mode = CAMERA_GRAB_LATEST;
-
-  // Low quality (and in local ram)
-  config.jpeg_quality = 10;
-  config.frame_size = FRAMESIZE_SVGA;
+  config.pixel_format = PIXFORMAT_JPEG; 
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LED_ON);  
+   
+ /* if(psramFound()){
+    config.frame_size = FRAMESIZE_UXGA;
+    config.jpeg_quality = 10;
+    config.fb_count = 2;
+  } else {*/
+    config.frame_size = FRAMESIZE_SVGA;
+    config.jpeg_quality = 10;
+    config.fb_count = 1;
+  //}
   config.grab_mode = CAMERA_GRAB_LATEST;
   config.fb_location = CAMERA_FB_IN_PSRAM;
-  // config.fb_location = CAMERA_FB_IN_DRAM;
 
-  // camera init
+  
+  // Camera init
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
     Serial.printf("Camera init failed with error 0x%x", err);
     return;
   }
+  s_compressed_frame_2 = (uint8_t *)ps_calloc(compressed_buffer_size, sizeof(uint8_t));
 }
-
 //
 // Main
 //
@@ -241,14 +273,14 @@ void configure_camera() {
 // static uint8_t *s_compressed_frame_2 = nullptr;
 // static size_t compressed_buffer_size = 400 + 3;
 void setup() {
-  Serial.begin(921600);
+  Serial.begin(115200);
   // SD.begin(21);
   Serial.println("Setup");
   Serial.println("Starting BLE...");
   configure_ble();
   // s_compressed_frame_2 = (uint8_t *) ps_calloc(compressed_buffer_size, sizeof(uint8_t));
-  Serial.println("Starting Microphone...");
-  configure_microphone();
+  //Serial.println("Starting Microphone...");
+  //configure_microphone();
   Serial.println("Starting Camera...");
   configure_camera();
   Serial.println("OK");
@@ -261,7 +293,7 @@ size_t sent_photo_frames = 0;
 bool need_send_photo = false;
 
 void loop() {
-
+/*
   // Read from mic
   size_t bytes_recorded = read_microphone();
 
@@ -278,7 +310,7 @@ void loop() {
     audio->setValue(s_compressed_frame, out_buffer_size);
     audio->notify();
     frame_count++;
-  }
+  }*/
 
   // Take a photo
   unsigned long now = millis();
@@ -290,6 +322,7 @@ void loop() {
       lastCaptureTime = now;
     }
   }
+  
 
   // Push to BLE
   if (need_send_photo) {
@@ -300,17 +333,17 @@ void loop() {
       s_compressed_frame_2[1] = (sent_photo_frames >> 8) & 0xFF;
       size_t bytes_to_copy = remaining;
       if (bytes_to_copy > 200) {
+
         bytes_to_copy = 200;
       }
       memcpy(&s_compressed_frame_2[2], &fb->buf[sent_photo_bytes], bytes_to_copy);
-      
+
       // Push to BLE
       photo->setValue(s_compressed_frame_2, bytes_to_copy + 2);
       photo->notify();
       sent_photo_bytes += bytes_to_copy;
       sent_photo_frames++;
     } else {
-
       // End flag
       s_compressed_frame_2[0] = 0xFF;
       s_compressed_frame_2[1] = 0xFF;

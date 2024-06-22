@@ -156,6 +156,14 @@
 #define PCLK_GPIO_NUM     22
 
 #define LED_GPIO_NUM      33
+#define LED_PIN      33
+#define LED_ON           LOW // - Pin is inverted.
+#define LED_OFF         HIGH 
+
+#define BCK_NUM          15
+#define WS_NUM           14
+#define DATA_OUT_NUM     I2S_PIN_NO_CHANGE
+#define DATA_IN_NUM      13
 
 #elif defined(CAMERA_MODEL_TTGO_T_JOURNAL)
 #define PWDN_GPIO_NUM      0
@@ -196,6 +204,11 @@
 #define PCLK_GPIO_NUM     13
 
 #define LED_GPIO_NUM      21
+
+#define BCK_NUM           42
+#define WS_NUM            41
+#define DATA_OUT_NUM      I2S_PIN_NO_CHANGE
+#define DATA_OUT_NUM      -1
 
 #elif defined(CAMERA_MODEL_ESP32_CAM_BOARD)
 // The 18 pin header on the board has Y5 and Y3 swapped
