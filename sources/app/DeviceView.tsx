@@ -147,6 +147,17 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
                     readOnly={agentState.loading}
                     onSubmitEditing={(e) => agent.answer(e.nativeEvent.text, false)}
                 />
+            {/*  add part that visualizes the triggers */}
+            <View style={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    {agentState.triggerstr && (<ScrollView style={{ flexGrow: 1, flexBasis: 0 }}><Text style={{ color: 'white', fontSize: 32 }}>{agentState.triggerstr}</Text></ScrollView>)}
+                </View>
+<TextInput
+                    style={{ color: 'white', height: 64, fontSize: 32, borderRadius: 16, backgroundColor: 'rgb(48 48 48)', padding: 16 }}
+                    placeholder='What do you need?'
+                    placeholderTextColor={'#888'}
+                    readOnly={agentState.loading}
+                    onSubmitEditing={(e) => agent.addtrigger(e.nativeEvent.text)}
+                />
             </View>
              {/* Modal for Notification */}
             
