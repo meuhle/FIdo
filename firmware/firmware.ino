@@ -242,8 +242,8 @@ void configure_camera() {
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG; 
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LED_ON);  
+  pinMode(LED_GPIO_NUM, OUTPUT);
+  digitalWrite(LED_GPIO_NUM, LED_ON);  
    
  /* if(psramFound()){
     config.frame_size = FRAMESIZE_UXGA;

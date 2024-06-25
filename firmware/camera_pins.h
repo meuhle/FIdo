@@ -204,6 +204,8 @@
 #define PCLK_GPIO_NUM     13
 
 #define LED_GPIO_NUM      21
+#define LED_ON           HIGH 
+#define LED_OFF         LOW 
 
 #define BCK_NUM           42
 #define WS_NUM            41
