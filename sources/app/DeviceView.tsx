@@ -112,7 +112,7 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
                     question += ", ";
                 }
             }
-            question += " in the last picture? Just answer Yes or No"
+            question += " in the last picture? Just answer Yes or No. And the list of objects seen in the pic like Snake/Dog/etc.."
             agent.answer(question,true);
             console.log(agentState.snakes)
            /* if (typeof agentState.snakes === 'string'){

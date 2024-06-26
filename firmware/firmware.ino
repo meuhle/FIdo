@@ -337,10 +337,10 @@ void loop() {
     audio->notify();
     frame_count++;
   }*/
-
+ unsigned long sec_to_pic = 5 * 1000
   // Take a photo
   unsigned long now = millis();
-  if ((now - lastCaptureTime) >= 5000 && !need_send_photo && connected) {
+  if ((now - lastCaptureTime) >= sec_to_pic && !need_send_photo && connected) {
     if (take_photo()) {
       need_send_photo = true;
       sent_photo_bytes = 0;
