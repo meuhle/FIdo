@@ -153,7 +153,7 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
                 </View>
 <TextInput
                     style={{ color: 'white', height: 64, fontSize: 32, borderRadius: 16, backgroundColor: 'rgb(48 48 48)', padding: 16 }}
-                    placeholder='What do you need?'
+                    placeholder='Add a Trigger?'
                     placeholderTextColor={'#888'}
                     readOnly={agentState.loading}
                     onSubmitEditing={(e) => agent.addtrigger(e.nativeEvent.text)}
