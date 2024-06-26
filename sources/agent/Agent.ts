@@ -16,8 +16,8 @@ type AgentState = {
 export class Agent {
     #lock = new AsyncLock();
     #photos: { photo: Uint8Array, description: string }[] = [];
-    #state: AgentState = { loading: false, trigger : ['Snakes'] };
-    #stateCopy: AgentState = { loading: false, trigger : ['Snakes']  };
+    #state: AgentState = { loading: false, trigger : ['Snakes']  };
+    #stateCopy: AgentState = { loading: false, trigger : ['Snakes'] };
     #stateListeners: (() => void)[] = [];
 
     async addPhoto(photos: Uint8Array[]) {
@@ -88,12 +88,18 @@ export class Agent {
         }
         this.printtrigger()
      }
+     returnTrigger(){
+        return this.#state.trigger;
+     }
      printtrigger(){
-        for (var v  in this.#state.trigger){
-            this.#state.triggerstr += v
+        this.#state.triggerstr = "";        
+        var l = this.#state.trigger.length;
+        for (var i=0; i<l;i++){
+            this.#state.triggerstr += this.#state.trigger[i];
+            if(i!=l-1){
+                this.#state.triggerstr += ", ";
+            }
         }
-        
-        
      }
 
     #notify = () => {

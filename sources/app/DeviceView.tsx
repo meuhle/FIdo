@@ -77,6 +77,7 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
     const [subscribed, photos] = usePhotos(props.device);
     const agent = React.useMemo(() => new Agent(), []);
     const agentState = agent.use();
+    agent.printtrigger();
 
     const [modalVisible, setModalVisible] = React.useState(false);
 
@@ -102,7 +103,17 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
     let answer:string = "";
     React.useEffect(() => {
         if (photos.length > previousPhotosCount.current) {
-            agent.answer("There is one or multiple snakes in the last picture? Just answer Yes or No",true);
+            let question = "There is one or multiple of the following objects: ";
+            let trigger = agent.returnTrigger();
+            let l = trigger.length;
+            for (let i =0 ; i<l ; i++){
+                question += trigger[i];
+                if(i!=l-1){
+                    question += ", ";
+                }
+            }
+            question += " in the last picture? Just answer Yes or No"
+            agent.answer(question,true);
             console.log(agentState.snakes)
            /* if (typeof agentState.snakes === 'string'){
                 if (agentState.snakes.indexOf('Yes') != -1 ){
