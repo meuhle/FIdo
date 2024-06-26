@@ -4,7 +4,7 @@ import { rotateImage } from '../modules/imaging';
 import { toBase64Image } from '../utils/base64';
 import { Agent } from '../agent/Agent';
 import { InvalidateSync } from '../utils/invalidateSync';
-import { textToSpeech } from '../modules/openai';
+//import { textToSpeech } from '../modules/openai';
 
 function usePhotos(device: BluetoothRemoteGATTServer) {
 
@@ -112,7 +112,8 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
                     question += ", ";
                 }
             }
-            question += " in the last picture? Just answer Yes or No. And the list of objects seen in the pic like Snake/Dog/etc.."
+            question += " in the last picture? \n"
+            question += "THE ANSWER MUST BE IN FORMAT Yes/No: [list of objects triggered]"
             agent.answer(question,true);
             console.log(agentState.snakes)
            /* if (typeof agentState.snakes === 'string'){
@@ -124,11 +125,11 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
         previousPhotosCount.current = photos.length;
     }, [photos]);
 
-    React.useEffect(() => {
+   /* React.useEffect(() => {
         if (agentState.answer) {
-            textToSpeech(agentState.answer)
+           // textToSpeech(agentState.answer)
         }
-    }, [agentState.answer])
+    }, [agentState.answer])*/
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
