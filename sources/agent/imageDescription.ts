@@ -1,6 +1,6 @@
 import { KnownModel, ollamaInference } from "../modules/ollama";
 import { groqRequest } from "../modules/groq-llama3";
-import { gptRequest } from "../modules/openai";
+//import { gptRequest } from "../modules/openai";
 
 
 export async function imageDescription(src: Uint8Array, model: KnownModel = 'moondream:1.8b-v2-fp16'): Promise<string> {
@@ -35,7 +35,7 @@ export async function llamaFind(question: string, images: string): Promise<strin
     );
 }
 
-export async function openAIFind(question: string, images: string): Promise<string> {
+/*export async function openAIFind(question: string, images: string): Promise<string> {
     return gptRequest(
              `
                 You are a smart AI that need to read through description of a images and answer user's questions.
@@ -51,4 +51,4 @@ export async function openAIFind(question: string, images: string): Promise<stri
         ,
             question
     );
-}
+}*/

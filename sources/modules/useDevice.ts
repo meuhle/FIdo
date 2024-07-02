@@ -12,7 +12,7 @@ export function useDevice(): [BluetoothRemoteGATTServer | null, () => Promise<vo
 
             // Connect to device
             let connected = await navigator.bluetooth.requestDevice({
-                filters: [{ name: 'OpenGlass' }],
+                filters: [{ name: 'FidoCamera' }],
                 optionalServices: ['19B10000-E8F2-537E-4F6C-D104768A1214'.toLowerCase()],
             });
 
@@ -31,6 +31,12 @@ export function useDevice(): [BluetoothRemoteGATTServer | null, () => Promise<vo
         } catch (e) {
             // Handle error
             console.error(e);
+            const error = e as Error;
+            if (error.name === 'NotFoundError') {
+                console.log('User cancelled the requestDevice() chooser.');
+            } else {
+                console.error(error);
+            }
         }
     }, [device]);
 

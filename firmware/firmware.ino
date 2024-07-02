@@ -47,7 +47,7 @@ class MessageHandler : public BLECharacteristicCallbacks {
 };
 
 void configure_ble() {
-  BLEDevice::init("OpenGlass");
+  BLEDevice::init("FidoCamera");
   BLEServer *server = BLEDevice::createServer();
   BLEService *service = server->createService(serviceUUID);
 
@@ -337,7 +337,7 @@ void loop() {
     audio->notify();
     frame_count++;
   }*/
- unsigned long sec_to_pic = 5 * 1000
+ unsigned long sec_to_pic = 5 * 1000;
   // Take a photo
   unsigned long now = millis();
   if ((now - lastCaptureTime) >= sec_to_pic && !need_send_photo && connected) {
@@ -359,7 +359,6 @@ void loop() {
       s_compressed_frame_2[1] = (sent_photo_frames >> 8) & 0xFF;
       size_t bytes_to_copy = remaining;
       if (bytes_to_copy > 200) {
-
         bytes_to_copy = 200;
       }
       memcpy(&s_compressed_frame_2[2], &fb->buf[sent_photo_bytes], bytes_to_copy);

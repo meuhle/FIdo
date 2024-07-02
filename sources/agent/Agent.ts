@@ -3,6 +3,12 @@ import { AsyncLock } from "../utils/lock";
 import { imageDescription, llamaFind } from "./imageDescription";
 import { startAudio } from '../modules/openai';
 
+type Trigger_log={
+    pic: string;
+    trigger: string;
+    
+}
+
 type AgentState = {
     lastDescription?: string;
     answer?: string;
@@ -11,6 +17,7 @@ type AgentState = {
     log?: string[];
     trigger: string[];
     triggerstr?: string;
+    triggered_pic?: [];
 }
 
 export class Agent {
