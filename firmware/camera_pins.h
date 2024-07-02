@@ -156,7 +156,6 @@
 #define PCLK_GPIO_NUM     22
 
 #define LED_GPIO_NUM      33
-#define LED_PIN      33
 #define LED_ON           LOW // - Pin is inverted.
 #define LED_OFF         HIGH 
 

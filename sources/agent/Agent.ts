@@ -76,8 +76,15 @@ export class Agent {
              if (snakes){
                 let dateTime = new Date()
                  //this.#state.snakes = answer;
-                 this.#state.snakes = answer;
-                 this.#state.log?.push(dateTime.toString() + answer)
+                 //ANSWER should be in the format of YES/NO. [list,of,trigger]
+                 let spl = answer.split('.');
+                 this.#state.snakes = "";
+                 //this.#state.snakes = answer;
+                 if( spl[0].indexOf('YES') != -1){
+                    this.#state.log?.push(dateTime.toString() + spl[1]);
+                    this.#state.snakes = spl[1];
+                 }
+                 
              }else{
              this.#state.answer = answer;
              this.#state.loading = false;

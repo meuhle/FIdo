@@ -102,7 +102,7 @@ export async function gptRequest(systemPrompt: string, userPrompt: string) {
     }
 }
 
-/*
+
 textToSpeech("Hello I am an agent")
 console.info(gptRequest(
     `
@@ -121,4 +121,4 @@ console.info(gptRequest(
         ,
             'where is the person?'
 
-))*/
+))

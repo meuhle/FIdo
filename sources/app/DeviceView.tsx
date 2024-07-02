@@ -4,7 +4,7 @@ import { rotateImage } from '../modules/imaging';
 import { toBase64Image } from '../utils/base64';
 import { Agent } from '../agent/Agent';
 import { InvalidateSync } from '../utils/invalidateSync';
-//import { textToSpeech } from '../modules/openai';
+import { textToSpeech } from '../modules/openai';
 
 function usePhotos(device: BluetoothRemoteGATTServer) {
 
@@ -113,7 +113,7 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
                 }
             }
             question += " in the last picture? \n"
-            question += "THE ANSWER MUST BE IN FORMAT Yes/No: [list of objects triggered]"
+            question += "THE ANSWER MUST BE IN FORMAT Yes/No. [list of objects triggered]"
             agent.answer(question,true);
             console.log(agentState.snakes)
            /* if (typeof agentState.snakes === 'string'){
@@ -134,9 +134,9 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
              {/* Red alert on top if agentState.snakes is defined */}
-             {typeof agentState.snakes === 'string'&& agentState.snakes.indexOf('Yes') != -1 && (
+             {typeof agentState.snakes === 'string'&& agentState.snakes != "" && (
                 <View style={{ position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: 'red', padding: 10, zIndex: 1000 }}>
-                    <Text style={{ color: 'white', fontSize: 18 }}>Alert: Snake detected!</Text>
+                    <Text style={{ color: 'white', fontSize: 18 }}>Alert trigger detected: {agentState.snakes} </Text>
                 </View>
             )}
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
@@ -170,6 +170,9 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
                     readOnly={agentState.loading}
                     onSubmitEditing={(e) => agent.addtrigger(e.nativeEvent.text)}
                 />
+                <Text style={{ color: '#888', fontSize: 14, marginTop: 10, textAlign: 'center' }}>
+                  Enter a keyword to add, retype to delete.
+                </Text>
             </View>
              {/* Modal for Notification */}
             
