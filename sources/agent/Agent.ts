@@ -13,6 +13,7 @@ type AgentState = {
     lastDescription?: string;
     answer?: string;
     snakes?: string;
+    snakesans?: string;
     loading: boolean;
     snaking: boolean;
     log?: string[];
@@ -65,7 +66,7 @@ export class Agent {
                 return;
             }
             this.#state.snaking = true;
-            // this.#notify();
+            this.#notify();
          }
          else{
             if (this.#state.loading) {
@@ -86,6 +87,7 @@ export class Agent {
              }
              let answer = await llamaFind(question, combined);
              if (snakes){
+                this.#state.snakesans = answer;
                 this.#state.snakes = undefined;
                 let dateTime = new Date()
                  //this.#state.snakes = answer;
@@ -100,7 +102,7 @@ export class Agent {
                  }
                  
                  this.#state.snaking = false;
-                // this.#notify();
+                 this.#notify();
                  //this.#state.snakes = answer;
                  
                  

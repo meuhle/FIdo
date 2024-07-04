@@ -103,7 +103,7 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
     let answer:string = "";
     React.useEffect(() => {
         if (photos.length > previousPhotosCount.current) {
-            let question = "There is one or multiple of the following trigger: ";
+            let question = "There is one or multiple of the following objects: ";
             let trigger = agent.returnTrigger();
             let l = trigger.length;
             for (let i =0 ; i<l ; i++){
@@ -113,11 +113,12 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
                 }
             }
             question += " in the last picture? \n"
-            question += "THE ANSWER MUST BE IN FORMAT Yes/No. list of triggers seen in picture separated by , \n";
+            question += "THE ANSWER MUST BE IN FORMAT Yes/No. if yes list of objects seen in picture separated by , \n";
             question += "Examples: Yes. Snake,Dog,Cat \n No. \n Yes. Dog \n";
-            question += "DO NOT add external object that are not referred to the triggers";
+            question += "DO NOT add external object that are not referred to the list";
             agent.answer(question,true);
-            console.log(agentState.snakes)
+            console.log(agentState.snakes);
+            console.log(agentState.snakesans);
             if (typeof agentState.snakes === 'string' && agentState.snakes != undefined){
                 alert("Alert trigger detected: " + agentState.snakes);
             }
