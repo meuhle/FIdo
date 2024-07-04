@@ -119,11 +119,11 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
             agent.answer(question,true);
             console.log(agentState.snakes);
             console.log(agentState.snakesans);
-            if (typeof agentState.snakes === 'string' && agentState.snakes != undefined && !agentState.alert){
+         /*   if (typeof agentState.snakes === 'string' && agentState.snakes != undefined && !agentState.alert){
                 agentState.alert = true;
                 alert("Alert trigger detected: " + agentState.snakes);
                 agentState.alert = false;
-            }
+            }*/
         }
         previousPhotosCount.current = photos.length;
     }, [photos]);
@@ -138,6 +138,11 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        {typeof agentState.snakes === 'string' && agentState.snakes != undefined && (
+    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: 'red', padding: 10, zIndex: 1000 }}>
+       <Text style={{ color: 'white', fontSize: 18 }}>Alert trigger detected: {agentState.snakes} </Text>
+    </View>
+)}
             
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
