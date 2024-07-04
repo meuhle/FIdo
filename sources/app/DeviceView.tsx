@@ -103,7 +103,7 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
     let answer:string = "";
     React.useEffect(() => {
         if (photos.length > previousPhotosCount.current) {
-            let question = "There is one or multiple of the following objects: ";
+            let question = "There is one or multiple of the following trigger: ";
             let trigger = agent.returnTrigger();
             let l = trigger.length;
             for (let i =0 ; i<l ; i++){
@@ -113,32 +113,29 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
                 }
             }
             question += " in the last picture? \n"
-            question += "THE ANSWER MUST BE IN FORMAT Yes/No. [list of objects triggered]"
+            question += "THE ANSWER MUST BE IN FORMAT Yes/No. list of triggers seen in picture separated by , \n";
+            question += "Examples: Yes. Snake,Dog,Cat \n No. \n Yes. Dog \n";
+            question += "DO NOT add external object that are not referred to the triggers";
             agent.answer(question,true);
             console.log(agentState.snakes)
-           /* if (typeof agentState.snakes === 'string'){
-                if (agentState.snakes.indexOf('Yes') != -1 ){
-                    alert("Snakesssss")
-                }
-            }*/
+            if (typeof agentState.snakes === 'string' && agentState.snakes != undefined){
+                alert("Alert trigger detected: " + agentState.snakes);
+            }
         }
         previousPhotosCount.current = photos.length;
     }, [photos]);
-
-   /* React.useEffect(() => {
-        if (agentState.answer) {
-           // textToSpeech(agentState.answer)
-        }
-    }, [agentState.answer])*/
+    /* Red alert on top if agentState.snakes is defined }*/
+/* 
+{typeof agentState.snakes === 'string' && agentState.snakes != undefined && (
+    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: 'red', padding: 10, zIndex: 1000 }}>
+        alert(Alert trigger detected: {agentState.snakes}); /*<Text style={{ color: 'white', fontSize: 18 }}> </Text>
+    </View>
+)}*/
+    
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-             {/* Red alert on top if agentState.snakes is defined */}
-             {typeof agentState.snakes === 'string'&& agentState.snakes != "" && (
-                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: 'red', padding: 10, zIndex: 1000 }}>
-                    <Text style={{ color: 'white', fontSize: 18 }}>Alert trigger detected: {agentState.snakes} </Text>
-                </View>
-            )}
+            
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                     {photos.map((photo, index) => (

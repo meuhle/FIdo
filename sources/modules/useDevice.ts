@@ -31,12 +31,7 @@ export function useDevice(): [BluetoothRemoteGATTServer | null, () => Promise<vo
         } catch (e) {
             // Handle error
             console.error(e);
-            const error = e as Error;
-            if (error.name === 'NotFoundError') {
-                console.log('User cancelled the requestDevice() chooser.');
-            } else {
-                console.error(error);
-            }
+            
         }
     }, [device]);
 

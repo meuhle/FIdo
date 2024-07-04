@@ -14,6 +14,7 @@ type AgentState = {
     answer?: string;
     snakes?: string;
     loading: boolean;
+    snaking: boolean;
     log?: string[];
     trigger: string[];
     triggerstr?: string;
@@ -23,8 +24,8 @@ type AgentState = {
 export class Agent {
     #lock = new AsyncLock();
     #photos: { photo: Uint8Array, description: string }[] = [];
-    #state: AgentState = { loading: false, trigger : ['Snakes']  };
-    #stateCopy: AgentState = { loading: false, trigger : ['Snakes'] };
+    #state: AgentState = { loading: false,snaking:false, trigger : ['Snakes']  };
+    #stateCopy: AgentState = { loading: false,snaking:false, trigger : ['Snakes'] };
     #stateListeners: (() => void)[] = [];
 
     async addPhoto(photos: Uint8Array[]) {
@@ -56,14 +57,25 @@ export class Agent {
          } catch(error) {
              console.log("Failed to start audio")
          }*/
-         if (!snakes){
-             if (this.#state.loading) {
-             return;
+        
+             
+         
+         if (snakes){
+            if (this.#state.snaking) {
+                return;
+            }
+            this.#state.snaking = true;
+            // this.#notify();
+         }
+         else{
+            if (this.#state.loading) {
+                return;
+            }
+            this.#state.loading = true;
+             this.#notify();
          }
          
-         this.#state.loading = true;
-         this.#notify();
-         }
+         
          await this.#lock.inLock(async () => {
              let combined = '';
              let i = 0;
@@ -74,16 +86,23 @@ export class Agent {
              }
              let answer = await llamaFind(question, combined);
              if (snakes){
+                this.#state.snakes = undefined;
                 let dateTime = new Date()
                  //this.#state.snakes = answer;
-                 //ANSWER should be in the format of YES/NO. [list,of,trigger]
-                 let spl = answer.split('.');
-                 this.#state.snakes = "";
-                 //this.#state.snakes = answer;
-                 if( spl[0].indexOf('YES') != -1){
-                    this.#state.log?.push(dateTime.toString() + spl[1]);
-                    this.#state.snakes = spl[1];
+                 //ANSWER should be in the format of YES/NO. list of trigger separated by commas
+                 if (typeof answer === "string" && answer.toLowerCase().indexOf('yes') != -1){                    
+                    if( answer.indexOf('.') != -1){
+                        let spl = answer.split('.');
+                        this.#state.log?.push(dateTime.toString() + spl[1]);
+                        //TODO add the log with pic reference
+                        this.#state.snakes = spl[1];
+                     }
                  }
+                 
+                 this.#state.snaking = false;
+                // this.#notify();
+                 //this.#state.snakes = answer;
+                 
                  
              }else{
              this.#state.answer = answer;
