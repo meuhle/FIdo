@@ -16,6 +16,7 @@ type AgentState = {
     snakesans?: string;
     loading: boolean;
     snaking: boolean;
+    alert: boolean;
     log?: string[];
     trigger: string[];
     triggerstr?: string;
@@ -25,8 +26,8 @@ type AgentState = {
 export class Agent {
     #lock = new AsyncLock();
     #photos: { photo: Uint8Array, description: string }[] = [];
-    #state: AgentState = { loading: false,snaking:false, trigger : ['Snakes']  };
-    #stateCopy: AgentState = { loading: false,snaking:false, trigger : ['Snakes'] };
+    #state: AgentState = { loading: false,snaking:false,alert:false, trigger : ['Snakes']  };
+    #stateCopy: AgentState = { loading: false,snaking:false,alert:false, trigger : ['Snakes'] };
     #stateListeners: (() => void)[] = [];
 
     async addPhoto(photos: Uint8Array[]) {

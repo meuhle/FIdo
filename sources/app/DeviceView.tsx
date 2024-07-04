@@ -119,8 +119,10 @@ export const DeviceView = React.memo((props: { device: BluetoothRemoteGATTServer
             agent.answer(question,true);
             console.log(agentState.snakes);
             console.log(agentState.snakesans);
-            if (typeof agentState.snakes === 'string' && agentState.snakes != undefined){
+            if (typeof agentState.snakes === 'string' && agentState.snakes != undefined && !agentState.alert){
+                agentState.alert = true;
                 alert("Alert trigger detected: " + agentState.snakes);
+                agentState.alert = false;
             }
         }
         previousPhotosCount.current = photos.length;
